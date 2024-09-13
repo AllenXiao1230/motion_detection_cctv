@@ -4,10 +4,10 @@ import mediapipe as mp
 
 # 啟動攝影機
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
 # 設定錄影格式
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 fps = 30.0
 # frame_size = (int(cap.get(3)), int(cap.get(4)))
