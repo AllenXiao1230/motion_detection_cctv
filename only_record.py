@@ -2,67 +2,21 @@ import cv2
 import datetime
 import mediapipe as mp
 import os
-import configparser
 
-import functions
-
-# 讀取 INI 設定檔
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-# 檢查是否為第一次開啟
-if not config.has_section('Settings'):
-    config.add_section('Settings')
-    config.set('Settings', 'first_run', 'True')
-    config.set('Settings', 'available_resolutions', '')
-    config.set('Settings', 'preferred_resolution', '')
-
-    if os.path.exists('initializing.jpg'):
-        img = cv2.imread('initializing.jpg')
-        if img is not None:
-            cv2.namedWindow('Initializing...')
-            cv2.imshow('Initializing...', img)
-            
-
-        else:
-            print("Error reading image file")
-    else:
-        print("Image file not found")
-
-    # 初始化可用解析度
-    available_resolutions = functions.list_camera_resolutions()
-    cv2.destroyAllWindows()
-    # 儲存 INI 設定檔
-    preferred_resolution = (640, 480)  # 預設解析度
-    config.set('Settings', 'available_resolutions', str(available_resolutions))
-    config.set('Settings', 'preferred_resolution', str(available_resolutions[0]))
-
-    # 創建一個視窗告知使用者正在初始化
-
-
-    # 儲存 INI 設定檔
-    with open('config.ini', 'w') as f:
-        config.write(f) 
-
-# 讀取可用解析度和偏好解析度從 INI 檔案
-available_resolutions = eval(config.get('Settings', 'available_resolutions'))
-preferred_resolution = eval(config.get('Settings', 'preferred_resolution'))
-
-# 設定攝影機捕捉物件以偏好解析度
+# 啟動攝影機
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, preferred_resolution[0])
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, preferred_resolution[1])
 
 capture_folder = 'Capture'
 if not os.path.exists(capture_folder):
     os.makedirs(capture_folder)
 
 # 設定錄影格式
-frame_size = preferred_resolution
-fi = (preferred_resolution[0], preferred_resolution[1])
-resolution_index = available_resolutions.index(fi)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 fourcc = cv2.VideoWriter_fourcc(*'MP4V')
 fps = 30.0
+# frame_size = (int(cap.get(3)), int(cap.get(4)))
+frame_size = (1280, 720)
 
 # 設定人物偵測器
 mp_pose = mp.solutions.pose
@@ -151,18 +105,6 @@ while True:
         show_bounding_box = not show_bounding_box
     elif key == ord('r'):
         detection_mode = not detection_mode
-    elif key == ord('c'):
-        cap.release()
-        resolution_index = (resolution_index + 1) % len(available_resolutions)
-        frame_size = available_resolutions[resolution_index]
-        cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_size[0])
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_size[1])
-
-        # 更新偏好解析度在 INI 檔案
-        config.set('Settings', 'preferred_resolution', f"({frame_size[0]}, {frame_size[1]})")
-        with open('config.ini', 'w') as f:
-            config.write(f)
 
 # 關閉攝影機和錄影
 cap.release()
